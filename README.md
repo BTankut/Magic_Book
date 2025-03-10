@@ -30,7 +30,11 @@ Magic Book, 0-12 yaş arası çocuklar için kişiselleştirilmiş masallar üre
 1. Flutter SDK'yı yükleyin (https://flutter.dev/docs/get-started/install)
 2. Projeyi klonlayın: `git clone https://github.com/BTankut/Magic_Book.git`
 3. Bağımlılıkları yükleyin: `flutter pub get`
-4. API anahtarlarınızı `.env` dosyasında ayarlayın:
+4. `.env.example` dosyasını kopyalayarak `.env` dosyası oluşturun ve API anahtarlarınızı ayarlayın:
+   ```bash
+   cp .env.example .env
+   ```
+   Ardından `.env` dosyasını düzenleyerek kendi API anahtarlarınızı ekleyin:
    ```
    GEMINI_API_KEY=your_gemini_api_key_here
    DALLE_API_KEY=your_dalle_api_key_here
