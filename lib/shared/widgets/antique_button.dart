@@ -25,6 +25,9 @@ class AntiqueButton extends StatefulWidget {
   /// Buton köşelerinin yuvarlaklık derecesi.
   final double borderRadius;
   
+  /// Butonun metin rengi (özelleştirmek için).
+  final Color? foregroundColor;
+  
   const AntiqueButton({
     super.key,
     required this.text,
@@ -34,6 +37,7 @@ class AntiqueButton extends StatefulWidget {
     this.width,
     this.height = 56.0,
     this.borderRadius = 12.0,
+    this.foregroundColor,
   });
 
   @override
@@ -74,9 +78,9 @@ class _AntiqueButtonState extends State<AntiqueButton> with SingleTickerProvider
         ? AppTheme.primaryColor 
         : Colors.transparent;
     
-    final Color textColor = widget.isPrimary 
+    final Color textColor = widget.foregroundColor ?? (widget.isPrimary 
         ? Colors.white 
-        : AppTheme.primaryColor;
+        : AppTheme.primaryColor);
     
     final Color borderColor = AppTheme.primaryColor;
     

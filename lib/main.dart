@@ -7,9 +7,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:magic_book/app.dart';
 import 'package:magic_book/core/services/logging_service.dart';
 import 'package:magic_book/core/services/service_locator.dart';
+import 'package:magic_book/shared/constants/theme.dart';
 import 'package:magic_book/shared/models/tale.dart';
 import 'package:magic_book/shared/models/tale_page.dart';
 import 'package:magic_book/shared/models/user_profile.dart';
+// 'theme_provider.dart' başka bir yerde kullanılıyor, ana kodda değil
+// import 'package:magic_book/shared/providers/theme_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Servis bulucu (Service locator) için global nesne
 final GetIt getIt = GetIt.instance;
@@ -57,6 +61,11 @@ void main() async {
   // Servisleri başlat (LoggingService service_locator içinde kaydedilecek)
   await setupServiceLocator();
   
+  // Tema tercihi yükleniyor
+  final prefs = await SharedPreferences.getInstance();
+  final themeType = prefs.getInt('themeType') ?? AppTheme.classic;
+  final useSystemTheme = prefs.getBool('useSystemTheme') ?? true;
+  
   // Uygulamayı başlat
   runApp(
     // Riverpod ile durum yönetimi için ProviderScope ekle
@@ -64,4 +73,9 @@ void main() async {
       child: MagicBookApp(),
     ),
   );
+  
+  // Tema değerlerini ayarla (bu şekilde initial değerleri yüklüyoruz)
+  getIt.get<LoggingService>().i('Tema değerleri yüklendi: themeType=$themeType, useSystemTheme=$useSystemTheme');
+  
+  // Bu değerler daha sonra ilk build sırasında kullanılacak
 }

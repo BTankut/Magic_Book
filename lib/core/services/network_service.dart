@@ -114,8 +114,7 @@ class NetworkService {
   /// Varsayılan constructor.
   NetworkService() : 
     _connectivity = Connectivity(),
-    _logger = getIt<LoggingService>() {
-  }
+    _logger = getIt<LoggingService>();
     
   /// Test için constructor.
   NetworkService.withDependencies(this._connectivity, this._logger);

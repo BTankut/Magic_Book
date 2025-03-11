@@ -80,9 +80,9 @@ class FavoriteTaleCard extends StatelessWidget {
                       right: 0,
                       child: Container(
                         padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Colors.green,
-                          borderRadius: const BorderRadius.only(
+                          borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(8),
                             bottomRight: Radius.circular(8),
                           ),

@@ -43,7 +43,7 @@ class _TaleViewerScreenState extends State<TaleViewerScreen> {
   bool _isFavorite = false;
   bool _isPlaying = false;
   int _currentPageIndex = 0;
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
   NetworkStatus _networkStatus = NetworkStatus.online;
   
   @override
@@ -139,23 +139,27 @@ class _TaleViewerScreenState extends State<TaleViewerScreen> {
       
       _logger.i('Masal favori durumu güncellendi: ${_tale!.id}, isFavorite: $newFavoriteStatus');
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(newFavoriteStatus 
-              ? 'Masal favorilere eklendi.' 
-              : 'Masal favorilerden çıkarıldı.'),
-          backgroundColor: AppTheme.primaryColor,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(newFavoriteStatus 
+                ? 'Masal favorilere eklendi.' 
+                : 'Masal favorilerden çıkarıldı.'),
+            backgroundColor: AppTheme.primaryColor,
+          ),
+        );
+      }
     } catch (e, stackTrace) {
       _logger.e('Favori durumu güncellenirken hata oluştu', error: e, stackTrace: stackTrace);
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Favori durumu güncellenirken bir hata oluştu. Lütfen tekrar deneyin.'),
-          backgroundColor: AppTheme.errorColor,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Favori durumu güncellenirken bir hata oluştu. Lütfen tekrar deneyin.'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
     }
   }
   
@@ -192,12 +196,14 @@ class _TaleViewerScreenState extends State<TaleViewerScreen> {
     } catch (e, stackTrace) {
       _logger.e('Sesli anlatım sırasında hata oluştu', error: e, stackTrace: stackTrace);
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Sesli anlatım sırasında bir hata oluştu. Lütfen tekrar deneyin.'),
-          backgroundColor: AppTheme.errorColor,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sesli anlatım sırasında bir hata oluştu. Lütfen tekrar deneyin.'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
     }
   }
   
@@ -243,7 +249,7 @@ class _TaleViewerScreenState extends State<TaleViewerScreen> {
       body: Column(
         children: [
           // Ağ durumu banner'ı
-          NetworkStatusBanner(),
+          const NetworkStatusBanner(),
           
           Expanded(
             child: Container(
@@ -446,7 +452,7 @@ class _TaleViewerScreenState extends State<TaleViewerScreen> {
                         } else if (snapshot.hasError || snapshot.data == null) {
                           _logger.e('Görsel yüklenirken hata oluştu', error: snapshot.error);
                           return Center(
-                            child: Icon(
+                            child: const Icon(
                               Icons.broken_image,
                               size: 64,
                               color: AppTheme.errorColor,
@@ -465,7 +471,7 @@ class _TaleViewerScreenState extends State<TaleViewerScreen> {
                                 errorBuilder: (context, error, stackTrace) {
                                   _logger.e('Görsel yüklenirken hata oluştu', error: error, stackTrace: stackTrace);
                                   return Center(
-                                    child: Icon(
+                                    child: const Icon(
                                       Icons.broken_image,
                                       size: 64,
                                       color: AppTheme.errorColor,

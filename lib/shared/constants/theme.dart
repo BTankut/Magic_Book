@@ -4,7 +4,21 @@ import 'package:flutter/material.dart';
 /// 
 /// Bu sınıf, uygulamanın tema ayarlarını içerir.
 class AppTheme {
-  // Renk paleti - Kahverengi tonları
+  // Tema seçicisi için sabitler - camelCase kullanılmalı
+  static const int classic = 0;
+  static const int fantasy = 1;
+  static const int ocean = 2;
+  static const int space = 3;
+  
+  // Tema adları
+  static const Map<int, String> themeNames = {
+    classic: "Klasik",
+    fantasy: "Fantastik",
+    ocean: "Deniz",
+    space: "Uzay",
+  };
+  
+  // Varsayılan (Klasik) tema - Kahverengi tonları
   static const Color primaryColor = Color(0xFF61472C); // Daha koyu kahverengi (ana renk)
   static const Color primaryLightColor = Color(0xFF8B6E4D); // Orta kahverengi
   static const Color secondaryColor = Color(0xFFAB8F6D); // Açık kahverengi
@@ -14,6 +28,39 @@ class AppTheme {
   static const Color textColor = Color(0xFF2E2418); // Koyu kahverengi metin
   static const Color textLightColor = Color(0xFFF8F2E9); // Açık metin rengi
   static const Color errorColor = Color(0xFFD64933); // Kırmızı (hata rengi)
+  
+  // Fantastik tema - Mor ve mavi tonları
+  static const Color fantasyPrimaryColor = Color(0xFF6A0DAD); // Mor (ana renk)
+  static const Color fantasyPrimaryLightColor = Color(0xFF9370DB); // Orta mor
+  static const Color fantasySecondaryColor = Color(0xFFB19CD9); // Açık lavanta
+  static const Color fantasyAccentColor = Color(0xFFE6B422); // Altın rengi aksanlar için
+  static const Color fantasyBackgroundColor = Color(0xFFF4EFFC); // Açık lavanta arka plan
+  static const Color fantasyCardColor = Color(0xFFFAF8FF); // Kart arka planı için daha açık ton
+  static const Color fantasyTextColor = Color(0xFF2D0C57); // Koyu mor metin
+  static const Color fantasyTextLightColor = Color(0xFFF8F6FF); // Açık metin rengi
+  static const Color fantasyErrorColor = Color(0xFFD32F2F); // Kırmızı (hata rengi)
+  
+  // Deniz teması - Mavi tonları
+  static const Color oceanPrimaryColor = Color(0xFF1A5F7A); // Deniz mavisi (ana renk)
+  static const Color oceanPrimaryLightColor = Color(0xFF3792CB); // Orta mavi
+  static const Color oceanSecondaryColor = Color(0xFF89CFF0); // Açık mavi
+  static const Color oceanAccentColor = Color(0xFFFF9A8B); // Mercan rengi aksanlar için
+  static const Color oceanBackgroundColor = Color(0xFFE6F2F5); // Açık mavi arka plan
+  static const Color oceanCardColor = Color(0xFFF1FBFF); // Kart arka planı için daha açık ton
+  static const Color oceanTextColor = Color(0xFF0A3143); // Koyu lacivert metin
+  static const Color oceanTextLightColor = Color(0xFFF0F8FF); // Açık metin rengi
+  static const Color oceanErrorColor = Color(0xFFE74C3C); // Kırmızı (hata rengi)
+  
+  // Uzay teması - Koyu tonlar
+  static const Color spacePrimaryColor = Color(0xFF3F0071); // Koyu mor (ana renk)
+  static const Color spacePrimaryLightColor = Color(0xFF7B2CBF); // Orta mor
+  static const Color spaceSecondaryColor = Color(0xFF9D4EDD); // Açık mor
+  static const Color spaceAccentColor = Color(0xFF10DAC0); // Turkuaz aksanlar için
+  static const Color spaceBackgroundColor = Color(0xFF121212); // Koyu siyah arka plan
+  static const Color spaceCardColor = Color(0xFF1E1E1E); // Kart arka planı için daha açık ton
+  static const Color spaceTextColor = Color(0xFFE6E6E6); // Beyaz metin
+  static const Color spaceTextLightColor = Color(0xFFFFFFFF); // Açık metin rengi
+  static const Color spaceErrorColor = Color(0xFFFF5252); // Kırmızı (hata rengi)
   
   // Yazı tipleri
   static const String primaryFontFamily = 'Montserrat';
@@ -27,7 +74,22 @@ class AppTheme {
     );
   }
   
-  // Işık teması
+  // Tema verileri getter metodu
+  static ThemeData getThemeData(int themeType, {bool isDark = false}) {
+    switch(themeType) {
+      case fantasy:
+        return isDark ? _getFantasyDarkTheme() : _getFantasyLightTheme();
+      case ocean:
+        return isDark ? _getOceanDarkTheme() : _getOceanLightTheme();
+      case space:
+        return isDark ? _getSpaceDarkTheme() : _getSpaceLightTheme();
+      case classic:
+      default:
+        return isDark ? darkTheme : lightTheme;
+    }
+  }
+  
+  // Işık teması - Klasik
   static final ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.light(
@@ -378,4 +440,355 @@ class AppTheme {
       }),
     ),
   );
+  
+  // Fantastik tema - Açık
+  static ThemeData _getFantasyLightTheme() {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.light(
+        primary: fantasyPrimaryColor,
+        secondary: fantasySecondaryColor,
+        tertiary: fantasyAccentColor,
+        background: fantasyBackgroundColor,
+        error: fantasyErrorColor,
+        onPrimary: Colors.white,
+        onSecondary: fantasyTextColor,
+        onBackground: fantasyTextColor,
+        surface: fantasyCardColor,
+        onSurface: fantasyTextColor,
+      ),
+      scaffoldBackgroundColor: fantasyBackgroundColor,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: fantasyPrimaryColor,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(
+          fontFamily: secondaryFontFamily,
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: fantasyTextColor,
+        ),
+        displayMedium: TextStyle(
+          fontFamily: secondaryFontFamily,
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: fantasyTextColor,
+        ),
+        displaySmall: TextStyle(
+          fontFamily: secondaryFontFamily,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: fantasyTextColor,
+        ),
+        headlineMedium: TextStyle(
+          fontFamily: secondaryFontFamily,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: fantasyTextColor,
+        ),
+        headlineSmall: TextStyle(
+          fontFamily: secondaryFontFamily,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: fantasyTextColor,
+        ),
+        titleLarge: TextStyle(
+          fontFamily: primaryFontFamily,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: fantasyTextColor,
+        ),
+        titleMedium: TextStyle(
+          fontFamily: primaryFontFamily,
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: fantasyTextColor,
+        ),
+        titleSmall: TextStyle(
+          fontFamily: primaryFontFamily,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: fantasyTextColor,
+        ),
+        bodyLarge: TextStyle(
+          fontFamily: primaryFontFamily,
+          fontSize: 16,
+          color: fantasyTextColor,
+        ),
+        bodyMedium: TextStyle(
+          fontFamily: primaryFontFamily,
+          fontSize: 14,
+          color: fantasyTextColor,
+        ),
+        bodySmall: TextStyle(
+          fontFamily: primaryFontFamily,
+          fontSize: 12,
+          color: fantasyTextColor,
+        ),
+        labelLarge: TextStyle(
+          fontFamily: primaryFontFamily,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: fantasyTextColor,
+        ),
+      ),
+      buttonTheme: const ButtonThemeData(
+        buttonColor: fantasyPrimaryColor,
+        textTheme: ButtonTextTheme.primary,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: fantasyPrimaryColor,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+      cardTheme: CardTheme(
+        color: fantasyCardColor,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+  
+  // Fantastik tema - Koyu
+  static ThemeData _getFantasyDarkTheme() {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.dark(
+        primary: fantasyPrimaryColor,
+        secondary: fantasySecondaryColor,
+        tertiary: fantasyAccentColor,
+        background: Color(0xFF1A0A2E),
+        error: fantasyErrorColor,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+        onBackground: Colors.white,
+        surface: Color(0xFF2D1C45),
+        onSurface: Colors.white,
+      ),
+      scaffoldBackgroundColor: Color(0xFF1A0A2E),
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(
+          fontFamily: secondaryFontFamily,
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+        bodyLarge: TextStyle(
+          fontFamily: primaryFontFamily,
+          fontSize: 16,
+          color: Colors.white,
+        ),
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: fantasyPrimaryColor,
+        foregroundColor: Colors.white,
+      ),
+      cardTheme: CardTheme(
+        color: Color(0xFF2D1C45),
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+  
+  // Deniz tema - Açık
+  static ThemeData _getOceanLightTheme() {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.light(
+        primary: oceanPrimaryColor,
+        secondary: oceanSecondaryColor,
+        tertiary: oceanAccentColor,
+        background: oceanBackgroundColor,
+        error: oceanErrorColor,
+        onPrimary: Colors.white,
+        onSecondary: oceanTextColor,
+        onBackground: oceanTextColor,
+        surface: oceanCardColor,
+        onSurface: oceanTextColor,
+      ),
+      scaffoldBackgroundColor: oceanBackgroundColor,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: oceanPrimaryColor,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(
+          fontFamily: secondaryFontFamily,
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: oceanTextColor,
+        ),
+        bodyLarge: TextStyle(
+          fontFamily: primaryFontFamily,
+          fontSize: 16,
+          color: oceanTextColor,
+        ),
+      ),
+      cardTheme: CardTheme(
+        color: oceanCardColor,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: oceanPrimaryColor,
+          foregroundColor: Colors.white,
+        ),
+      ),
+    );
+  }
+  
+  // Deniz tema - Koyu
+  static ThemeData _getOceanDarkTheme() {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.dark(
+        primary: oceanPrimaryColor,
+        secondary: oceanSecondaryColor,
+        tertiary: oceanAccentColor,
+        background: Color(0xFF0A2A38),
+        error: oceanErrorColor,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+        onBackground: Colors.white,
+        surface: Color(0xFF103A4C),
+        onSurface: Colors.white,
+      ),
+      scaffoldBackgroundColor: Color(0xFF0A2A38),
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(
+          fontFamily: secondaryFontFamily,
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+        bodyLarge: TextStyle(
+          fontFamily: primaryFontFamily,
+          fontSize: 16,
+          color: Colors.white,
+        ),
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: oceanPrimaryColor,
+        foregroundColor: Colors.white,
+      ),
+      cardTheme: CardTheme(
+        color: Color(0xFF103A4C),
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+  
+  // Uzay tema - Açık
+  static ThemeData _getSpaceLightTheme() {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.light(
+        primary: spacePrimaryColor,
+        secondary: spaceSecondaryColor,
+        tertiary: spaceAccentColor,
+        background: Color(0xFFF0EDF5),
+        error: spaceErrorColor,
+        onPrimary: Colors.white,
+        onSecondary: spacePrimaryColor,
+        onBackground: spacePrimaryColor,
+        surface: Colors.white,
+        onSurface: spacePrimaryColor,
+      ),
+      scaffoldBackgroundColor: Color(0xFFF0EDF5),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: spacePrimaryColor,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(
+          fontFamily: secondaryFontFamily,
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: spacePrimaryColor,
+        ),
+        bodyLarge: TextStyle(
+          fontFamily: primaryFontFamily,
+          fontSize: 16,
+          color: spacePrimaryColor,
+        ),
+      ),
+      cardTheme: CardTheme(
+        color: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: spacePrimaryColor,
+          foregroundColor: Colors.white,
+        ),
+      ),
+    );
+  }
+  
+  // Uzay tema - Koyu
+  static ThemeData _getSpaceDarkTheme() {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.dark(
+        primary: spacePrimaryColor,
+        secondary: spaceSecondaryColor,
+        tertiary: spaceAccentColor,
+        background: spaceBackgroundColor,
+        error: spaceErrorColor,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+        onBackground: Colors.white,
+        surface: spaceCardColor,
+        onSurface: Colors.white,
+      ),
+      scaffoldBackgroundColor: spaceBackgroundColor,
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(
+          fontFamily: secondaryFontFamily,
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+        bodyLarge: TextStyle(
+          fontFamily: primaryFontFamily,
+          fontSize: 16,
+          color: Colors.white,
+        ),
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: spacePrimaryColor,
+        foregroundColor: Colors.white,
+      ),
+      cardTheme: CardTheme(
+        color: spaceCardColor,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
 }

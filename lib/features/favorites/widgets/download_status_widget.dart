@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:magic_book/core/services/download_manager.dart';
-import 'package:magic_book/main.dart';
 import 'package:provider/provider.dart';
 
 /// İndirme durumu widget'ı.

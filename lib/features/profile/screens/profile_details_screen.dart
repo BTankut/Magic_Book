@@ -119,6 +119,74 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
     }
   }
   
+  /// Profil silme işlemini onaylar.
+  Future<void> _confirmDeleteProfile() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Profili Sil'),
+        content: Text('${_nameController.text} profilini silmek istediğinize emin misiniz?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('İptal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Sil'),
+          ),
+        ],
+      ),
+    );
+    
+    if (result == true && widget.profileId != null) {
+      await _deleteProfile(widget.profileId!);
+    }
+  }
+  
+  /// Profili siler.
+  Future<void> _deleteProfile(String profileId) async {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      await _storageService.deleteUserProfile(profileId);
+      _logger.i('Profil silindi: $profileId');
+      
+      // Aktif profil silinen profil ise, aktif profili temizle
+      final activeProfileId = _storageService.getActiveUserProfile();
+      if (activeProfileId == profileId) {
+        await _storageService.setActiveUserProfile('');
+      }
+      
+      if (mounted) {
+        Navigator.pop(context);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
+    } catch (e, stackTrace) {
+      _logger.e('Profil silinirken hata oluştu', error: e, stackTrace: stackTrace);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profil silinirken bir hata oluştu. Lütfen tekrar deneyin.'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -244,6 +312,8 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                         DropdownMenuItem(value: HairType.straight, child: Text('Düz')),
                         DropdownMenuItem(value: HairType.wavy, child: Text('Dalgalı')),
                         DropdownMenuItem(value: HairType.curly, child: Text('Kıvırcık')),
+                        DropdownMenuItem(value: HairType.coily, child: Text('Sıkı Kıvırcık')),
+                        DropdownMenuItem(value: HairType.bald, child: Text('Kel')),
                       ],
                       onChanged: (value) {
                         setState(() {
@@ -286,6 +356,19 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                     ),
                     
                     const SizedBox(height: 16),
+                    
+                    // Profil silme butonu (yalnızca düzenleme modunda)
+                    if (_isEditing) 
+                      AntiqueButton(
+                        text: 'Profili Sil',
+                        onPressed: _confirmDeleteProfile,
+                        icon: Icons.delete_forever,
+                        isPrimary: false,
+                        foregroundColor: Colors.red,
+                      ),
+                      
+                    if (_isEditing)
+                      const SizedBox(height: 16),
                     
                     // İptal butonu
                     TextButton(

@@ -102,21 +102,25 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       
       _logger.i('Masal favorilerden çıkarıldı: ${tale.id}');
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Masal favorilerden çıkarıldı.'),
-          backgroundColor: AppTheme.primaryColor,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Masal favorilerden çıkarıldı.'),
+            backgroundColor: AppTheme.primaryColor,
+          ),
+        );
+      }
     } catch (e, stackTrace) {
       _logger.e('Masal favorilerden çıkarılırken hata oluştu', error: e, stackTrace: stackTrace);
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Masal favorilerden çıkarılırken bir hata oluştu. Lütfen tekrar deneyin.'),
-          backgroundColor: AppTheme.errorColor,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Masal favorilerden çıkarılırken bir hata oluştu. Lütfen tekrar deneyin.'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
     }
   }
   
@@ -201,7 +205,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       body: Column(
         children: [
           // Ağ durumu banner'ı
-          NetworkStatusBanner(),
+          const NetworkStatusBanner(),
           
           Expanded(
             child: Container(

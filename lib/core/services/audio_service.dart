@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:magic_book/core/services/logging_service.dart';

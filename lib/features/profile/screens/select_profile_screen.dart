@@ -3,6 +3,7 @@ import 'package:magic_book/core/services/logging_service.dart';
 import 'package:magic_book/core/services/storage_service.dart';
 import 'package:magic_book/features/home/screens/home_screen.dart';
 import 'package:magic_book/features/onboarding/screens/create_profile_screen.dart';
+import 'package:magic_book/features/profile/screens/theme_selection_screen.dart';
 import 'package:magic_book/main.dart';
 import 'package:magic_book/shared/constants/theme.dart';
 import 'package:magic_book/shared/models/user_profile.dart';
@@ -194,17 +195,39 @@ class _SelectProfileScreenState extends State<SelectProfileScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const CreateProfileScreen(),
-            ),
-          );
-        },
-        backgroundColor: AppTheme.primaryColor,
-        child: const Icon(Icons.person_add),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Tema seçimi butonu
+          FloatingActionButton.small(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ThemeSelectionScreen(),
+                ),
+              );
+            },
+            backgroundColor: AppTheme.secondaryColor,
+            heroTag: 'theme',
+            child: const Icon(Icons.color_lens),
+          ),
+          const SizedBox(height: 16),
+          // Profil ekleme butonu
+          FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CreateProfileScreen(),
+                ),
+              );
+            },
+            backgroundColor: AppTheme.primaryColor,
+            heroTag: 'profile',
+            child: const Icon(Icons.person_add),
+          ),
+        ],
       ),
     );
   }

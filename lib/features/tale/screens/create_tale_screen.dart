@@ -139,9 +139,10 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
       }
       
       // Masal oluşturma ekranına yönlendir
-      Navigator.push(
-        context,
-        MaterialPageRoute(
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
           builder: (context) => TaleGenerationScreen(
             title: title,
             theme: _selectedTheme,
@@ -152,6 +153,7 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
           ),
         ),
       );
+      }
     } catch (e, stackTrace) {
       _logger.e('Masal oluşturulurken hata oluştu', error: e, stackTrace: stackTrace);
       
@@ -490,7 +492,7 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
       case TaleTheme.nature:
         return 'Doğa';
       case TaleTheme.space:
-        return 'Uzay';
+        return 'Bilim Kurgu';
       case TaleTheme.animals:
         return 'Hayvanlar';
       case TaleTheme.magic:

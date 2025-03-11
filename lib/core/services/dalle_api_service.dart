@@ -88,7 +88,7 @@ class DalleApiService {
       );
       
       if (response.statusCode != 200) {
-        _logger.e('API hatası: ${response.statusCode} ${response.body}');
+        _logger.e('API hatası: ${response.statusCode}');
         throw Exception('API hatası: ${response.statusCode}');
       }
       
@@ -110,7 +110,7 @@ class DalleApiService {
   /// API yanıtından base64 formatındaki görseli çıkarır.
   String extractBase64ImageFromResponse(Map<String, dynamic> data) {
     try {
-      _logger.d('API yanıtı: ${jsonEncode(data)}');
+      _logger.d('API yanıtı alındı: DALLE API yanıtı (base64 görsel içeriyor)');
       
       // Standart yanıt formatı
       if (data.containsKey('data') && 
@@ -142,7 +142,7 @@ class DalleApiService {
       }
       
       // Hiçbir format eşleşmedi, yanıtı detaylı logla ve hata fırlat
-      _logger.e('API yanıtı bilinen formatlarla eşleşmiyor: ${jsonEncode(data)}');
+      _logger.e('API yanıtı bilinen formatlarla eşleşmiyor');
       throw Exception('API yanıtı bilinen formatlarla eşleşmiyor');
     } catch (e, stackTrace) {
       _logger.e('API yanıtından görsel çıkarılırken hata oluştu', error: e, stackTrace: stackTrace);
@@ -188,6 +188,6 @@ class DalleApiService {
     }
   }
   
-  /// İki değerden küçük olanını döndürür.
-  int _min(int a, int b) => a < b ? a : b;
+  // Bu metot kullanılmadığı için kaldırıldı
+  // int _min(int a, int b) => a < b ? a : b;
 }

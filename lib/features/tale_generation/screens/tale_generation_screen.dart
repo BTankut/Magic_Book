@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:magic_book/core/services/audio_service.dart';
 import 'package:magic_book/core/services/logging_service.dart';
 import 'package:magic_book/core/services/storage_service.dart';
 import 'package:magic_book/features/tale/models/tale_model.dart' show TaleTheme, TaleSetting;
@@ -132,6 +130,8 @@ class _TaleGenerationScreenState extends State<TaleGenerationScreen> {
     }
   }
   
+  // Bu metot kullanılmıyor, yeni sürümde tale_generation_service içinden metin üretiliyor
+  /*
   /// Örnek masal sayfaları oluşturur.
   List<String> _generateDummyPageContents() {
     // Gerçek uygulamada bu içerik Gemini API'den gelecek
@@ -172,6 +172,7 @@ class _TaleGenerationScreenState extends State<TaleGenerationScreen> {
     
     return contents;
   }
+  */
   
   /// Tema adını döndürür.
   String _getThemeText(TaleTheme theme) {
@@ -295,7 +296,7 @@ class _TaleGenerationScreenState extends State<TaleGenerationScreen> {
         color: AppTheme.cardColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
-          side: BorderSide(
+          side: const BorderSide(
             color: AppTheme.primaryLightColor,
             width: 2,
           ),
@@ -336,7 +337,7 @@ class _TaleGenerationScreenState extends State<TaleGenerationScreen> {
                 child: LinearProgressIndicator(
                   value: _progress,
                   backgroundColor: Colors.grey.shade200,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+                  valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                   borderRadius: BorderRadius.circular(6),
                   minHeight: 10,
                 ),
@@ -345,7 +346,7 @@ class _TaleGenerationScreenState extends State<TaleGenerationScreen> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.info_outline,
                     size: 16,
                     color: AppTheme.primaryLightColor,

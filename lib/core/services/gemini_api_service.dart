@@ -272,12 +272,16 @@ class GeminiApiService {
     ''';
   }
   
+  // Bu metot kullanılmadığı için kaldırıldı
+  /*
   /// Hata durumunda yeniden deneme veya hata fırlatma.
   Future<String> _retryOrThrow(dynamic error, String prompt) async {
     // Basit bir yeniden deneme mekanizması
     try {
       _logger.i('Gemini API isteği yeniden deneniyor...');
+  */
       
+/*
       // 2 saniye bekle ve yeniden dene
       await Future.delayed(const Duration(seconds: 2));
       
@@ -304,7 +308,8 @@ class GeminiApiService {
       // API isteği gönder
       final response = await _client.post(
         url,
-        headers: {
+*/
+/*        headers: {
           'Content-Type': 'application/json',
         },
         body: jsonEncode(requestBody),
@@ -329,6 +334,7 @@ class GeminiApiService {
     _logger.w('Gemini API isteği başarısız oldu, örnek yanıt döndürülüyor');
     return _generateFallbackResponse(prompt);
   }
+  */
   
   /// Hata durumunda örnek bir yanıt döndürür.
   String _generateFallbackResponse(String prompt) {

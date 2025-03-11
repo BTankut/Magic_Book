@@ -2,6 +2,16 @@
 
 Magic Book, 0-12 yaş arası çocuklar için kişiselleştirilmiş masallar üreten interaktif bir mobil uygulamadır. Uygulama, kullanıcı girdilerine dayalı olarak özgün masallar oluşturur ve bu masalları görsellerle ve sesli anlatımla zenginleştirir.
 
+## Güncellemeler
+
+### Sürüm 1.1.0
+- DALL-E API yanıtları daha okunaklı şekilde loglanıyor (base64 içerik gösterilmiyor)
+- "Uzay" tema adı "Bilim Kurgu" olarak güncellendi (hikaye ortamında "Uzay" seçeneği korundu)
+- Kullanıcı profili saç tipi seçenekleri tamamlandı (eksik "Sıkı Kıvırcık" ve "Kel" tipleri eklendi)
+- Enum değerleri camelCase standardına göre yeniden adlandırıldı
+- BuildContext kullanımı için mounted kontrolü eklendi
+- Kod iyileştirmeleri ve lint hatalarının giderilmesi
+
 ## Özellikler
 
 - **Kişiselleştirilmiş Masal Üretimi**: Kullanıcı profili ve tercihlerine göre özelleştirilmiş masallar

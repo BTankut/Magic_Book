@@ -1,7 +1,3 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
-import 'package:flutter/foundation.dart';
 import 'package:magic_book/core/services/dalle_api_service.dart';
 import 'package:magic_book/core/services/gemini_api_service.dart';
 import 'package:magic_book/core/services/logging_service.dart';
@@ -234,11 +230,11 @@ class TaleGenerationService {
     int targetPageCount = (totalWordCount / 30).ceil();
     targetPageCount = targetPageCount.clamp(6, 15);
     
-    // Her sayfaya düşecek cümle sayısını hesapla
-    int sentencesPerPage = (sentences.length / targetPageCount).ceil();
+    // Her sayfaya düşecek cümle sayısını hesapla - şu anda doğrudan kelime bazlı bölme yapıyoruz
+    // int sentencesPerPage = (sentences.length / targetPageCount).ceil();
     
-    // Sayfaları oluştur
-    List<String> pages = [];
+    // Sayfaları oluştur - doğrudan kelime bazlı bölme yapıyoruz
+    // List<String> pages = [];
     
     // İçeriği direkt kelime sayısına göre bölelim
     List<String> allWords = content.split(' ');
@@ -251,22 +247,6 @@ class TaleGenerationService {
     
     // İçeriği kelime sayısına göre böl
     return _splitContentByWords(content, wordsPerPage);
-  }
-  
-  /// Uzun sayfayı cümleleri bölmeden parçalara ayırır
-  List<String> _splitLongPage(String pageContent) {
-    List<String> words = pageContent.split(' ');
-    int targetWordsPerPage = 45; // 45 kelime civarında
-    
-    List<String> pages = [];
-    
-    for (int i = 0; i < words.length; i += targetWordsPerPage) {
-      int end = (i + targetWordsPerPage) > words.length ? words.length : i + targetWordsPerPage;
-      String pagePart = words.sublist(i, end).join(' ');
-      pages.add(pagePart);
-    }
-    
-    return pages;
   }
   
   /// İçeriği kelime sayısına göre sayfalar halinde böler
@@ -290,6 +270,24 @@ class TaleGenerationService {
     return pages;
   }
   
+  // Aşağıdaki metotlar kullanılmıyor, yeni algoritmada _splitContentByWords yeterli
+  /*
+  /// Uzun sayfayı cümleleri bölmeden parçalara ayırır
+  List<String> _splitLongPage(String pageContent) {
+    List<String> words = pageContent.split(' ');
+    int targetWordsPerPage = 45; // 45 kelime civarında
+    
+    List<String> pages = [];
+    
+    for (int i = 0; i < words.length; i += targetWordsPerPage) {
+      int end = (i + targetWordsPerPage) > words.length ? words.length : i + targetWordsPerPage;
+      String pagePart = words.sublist(i, end).join(' ');
+      pages.add(pagePart);
+    }
+    
+    return pages;
+  }
+  
   /// Cümleleri sayfalara gruplandırır
   List<String> _groupSentencesIntoPages(List<String> sentences, int targetWordsPerPage) {
     List<String> pages = [];
@@ -297,7 +295,8 @@ class TaleGenerationService {
     int currentPageWordCount = 0;
     
     for (String sentence in sentences) {
-      // Cümleyi temizle
+  */
+  /*    // Cümleyi temizle
       sentence = sentence.trim();
       if (sentence.isEmpty) continue;
       
@@ -352,7 +351,10 @@ class TaleGenerationService {
     _logger.i('Cümlelerden ${pages.length} sayfa oluşturuldu');
     return pages;
   }
+  */
   
+  // Bu metot kullanılmadığı için yorum haline getirildi
+  /*
   /// Masal promptu oluşturur.
   String _createTalePrompt({
     required String title,
@@ -383,6 +385,7 @@ class TaleGenerationService {
     Lütfen sadece masal metnini döndür, başka açıklama ekleme.
     ''';
   }
+  */
   
   /// Görsel promptu oluşturur.
   String _createImagePrompt({
@@ -393,7 +396,7 @@ class TaleGenerationService {
     required int pageIndex,
   }) {
     return '''
-    Bir çocuk kitabı için ${setting} ortamında geçen, ${theme} temalı bir illüstrasyon.
+    Bir çocuk kitabı için $setting ortamında geçen, $theme temalı bir illüstrasyon.
     
     Ana karakter şu özelliklere sahip bir çocuk:
     - İsim: ${userProfile.name}
@@ -403,7 +406,7 @@ class TaleGenerationService {
     - Saç tipi: ${userProfile.hairTypeText}
     - Ten rengi: ${userProfile.skinToneText}
     
-    Sayfada şu içerik anlatılıyor: ${content}
+    Sayfada şu içerik anlatılıyor: $content
     
     Tarz: Sıcak, renkli, çocuk dostu, detaylı, dijital çizim.
     Görsel, antik bir kitap sayfasında yer alacak şekilde tasarlanmalı.

@@ -14,7 +14,7 @@ enum TaleTheme {
   /// Doğa konusu.
   nature,
   
-  /// Uzay konusu.
+  /// Bilim kurgu konusu.
   space,
   
   /// Hayvanlar konusu.
@@ -72,7 +72,7 @@ String getTaleThemeName(TaleTheme theme) {
     case TaleTheme.nature:
       return 'Doğa';
     case TaleTheme.space:
-      return 'Uzay';
+      return 'Bilim Kurgu';
     case TaleTheme.animals:
       return 'Hayvanlar';
     case TaleTheme.magic:

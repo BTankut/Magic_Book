@@ -3,7 +3,6 @@ import 'package:magic_book/core/services/logging_service.dart';
 import 'package:magic_book/core/services/network_service.dart';
 import 'package:magic_book/core/services/storage_service.dart';
 import 'package:magic_book/main.dart';
-import 'package:magic_book/shared/models/tale.dart';
 
 /// İndirme durumu.
 enum DownloadStatus {

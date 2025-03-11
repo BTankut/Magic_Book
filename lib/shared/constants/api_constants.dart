@@ -1,7 +1,8 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 /// API sabitleri.
 /// 
 /// Bu sınıf, API istekleri için gerekli sabitleri içerir.
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConstants {
   // Gemini API sabitleri

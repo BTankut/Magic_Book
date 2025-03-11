@@ -25,14 +25,22 @@ class LoggingService {
         lineLength: 120,
         colors: true,
         printEmojis: true,
-        printTime: true,
+        // printTime yerine dateTimeFormat kullanılmalı
+        dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
       ),
     );
   }
   
+  /// Trace seviyesinde log kaydı oluşturur.
+  /// Level.verbose yerine Level.trace kullanılmalı
+  void t(String message, {dynamic error, StackTrace? stackTrace}) {
+    _logger.t(message, error: error, stackTrace: stackTrace);
+  }
+  
   /// Verbose seviyesinde log kaydı oluşturur.
+  /// @deprecated Level.verbose yerine Level.trace kullanılmalı, v() yerine t() kullanın
   void v(String message, {dynamic error, StackTrace? stackTrace}) {
-    _logger.v(message, error: error, stackTrace: stackTrace);
+    t(message, error: error, stackTrace: stackTrace);
   }
   
   /// Debug seviyesinde log kaydı oluşturur.

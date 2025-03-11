@@ -1,11 +1,11 @@
+import 'dart:io';
+
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:magic_book/core/services/logging_service.dart';
 import 'package:magic_book/main.dart';
 import 'package:magic_book/shared/models/tale.dart';
-import 'package:magic_book/shared/models/tale_page.dart';
 import 'package:magic_book/shared/models/user_profile.dart';
 import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 
 /// Yerel depolama servisi.
 /// 

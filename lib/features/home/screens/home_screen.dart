@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:magic_book/core/services/logging_service.dart';
 import 'package:magic_book/core/services/network_service.dart';
 import 'package:magic_book/core/services/storage_service.dart';
 import 'package:magic_book/features/favorites/screens/favorites_screen.dart';
 import 'package:magic_book/features/profile/screens/profile_details_screen.dart';
+import 'package:magic_book/features/profile/screens/theme_selection_screen.dart';
 import 'package:magic_book/features/tale/screens/create_tale_screen.dart';
 import 'package:magic_book/main.dart';
 import 'package:magic_book/shared/constants/theme.dart';
 import 'package:magic_book/shared/models/user_profile.dart';
+import 'package:magic_book/shared/providers/theme_provider.dart';
 import 'package:magic_book/shared/widgets/antique_button.dart';
 import 'package:magic_book/shared/widgets/network_status_banner.dart';
 
@@ -15,14 +18,14 @@ import 'package:magic_book/shared/widgets/network_status_banner.dart';
 /// 
 /// Bu ekran, kullanıcının masal oluşturma, favori masalları görüntüleme
 /// ve profil ayarlarına erişim sağlar.
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProviderStateMixin {
   final LoggingService _logger = getIt<LoggingService>();
   final StorageService _storageService = getIt<StorageService>();
   final NetworkService _networkService = getIt<NetworkService>();
@@ -147,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           child: Column(
             children: [
               // Ağ durumu banner'ı
-              NetworkStatusBanner(),
+              const NetworkStatusBanner(),
               
               Expanded(
                 child: Padding(
@@ -194,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         color: AppTheme.primaryColor.withOpacity(0.2),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.auto_stories,
                         size: 120,
                         color: AppTheme.primaryColor,
@@ -278,19 +281,44 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   
   /// Üst bilgi çubuğunu oluşturur.
   Widget _buildAppBar() {
+    final themeType = ref.watch(themeTypeProvider);
+    final useSystemTheme = ref.watch(useSystemThemeProvider);
+    
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Boş alan (sol taraf)
-        const SizedBox(width: 48),
+        // Tema butonu (sol taraf)
+        IconButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ThemeSelectionScreen(),
+              ),
+            );
+          },
+          icon: const Icon(Icons.color_lens),
+          tooltip: 'Tema Değiştir',
+        ),
         
         // Başlık
-        Text(
-          'Sihirli Kitap',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppTheme.primaryColor,
-          ),
+        Column(
+          children: [
+            Text(
+              'Sihirli Kitap',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+            if (!useSystemTheme)
+              Text(
+                AppTheme.themeNames[themeType] ?? "Klasik",
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppTheme.primaryColor.withOpacity(0.7),
+                ),
+              ),
+          ],
         ),
         
         // Profil butonu (sağ taraf)
