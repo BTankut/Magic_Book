@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:magic_book/shared/utils/device_utils.dart';
 
 /// Uygulama teması.
 /// 
@@ -790,5 +791,50 @@ class AppTheme {
         ),
       ),
     );
+  }
+  
+  /// Cihaz tipine göre tema ayarlarını uygular
+  static ThemeData applyDeviceSpecificSettings(BuildContext context, ThemeData theme) {
+    final deviceType = DeviceUtils.getDeviceType(context);
+    
+    // Tablet (iPad) için özel ayarlar
+    if (deviceType == DeviceType.tablet) {
+      return theme.copyWith(
+        textTheme: theme.textTheme.copyWith(
+          displayLarge: theme.textTheme.displayLarge?.copyWith(
+            fontSize: 32.0, // iPad için daha büyük başlık
+          ),
+          displayMedium: theme.textTheme.displayMedium?.copyWith(
+            fontSize: 28.0,
+          ),
+          displaySmall: theme.textTheme.displaySmall?.copyWith(
+            fontSize: 24.0,
+          ),
+          headlineMedium: theme.textTheme.headlineMedium?.copyWith(
+            fontSize: 22.0,
+          ),
+          bodyLarge: theme.textTheme.bodyLarge?.copyWith(
+            fontSize: 18.0, // iPad için daha büyük metin
+          ),
+          bodyMedium: theme.textTheme.bodyMedium?.copyWith(
+            fontSize: 16.0,
+          ),
+        ),
+        // iPad için daha geniş butonlar
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            minimumSize: const Size(120, 48),
+          ),
+        ),
+        // iPad için daha geniş input alanları
+        inputDecorationTheme: theme.inputDecorationTheme.copyWith(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        ),
+      );
+    }
+    
+    // Diğer cihazlar için orijinal temayı döndür
+    return theme;
   }
 }

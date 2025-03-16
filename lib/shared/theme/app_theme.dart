@@ -11,7 +11,7 @@ class AppTheme {
   static const Color secondaryColor = Color(0xFFD2B48C); // Tan
   
   /// Arka plan rengi.
-  static const Color backgroundColor = Color(0xFFF5F5DC); // Bej
+  static const Color backgroundColor = Color(0xFFE2D7C8); // Bej
   
   /// Metin rengi.
   static const Color textColor = Color(0xFF3E2723); // Koyu kahverengi

@@ -217,4 +217,21 @@ class AudioService {
       rethrow;
     }
   }
+  
+  /// Kaynakları serbest bırakır.
+  /// 
+  /// Bu metot, servis kullanımı bittiğinde çağrılmalıdır.
+  Future<void> dispose() async {
+    try {
+      // Çalışıyorsa durdur
+      if (_state == AudioState.playing || _state == AudioState.paused) {
+        await stop();
+      }
+      
+      // FlutterTts kaynağını temizle
+      _logger.d('AudioService kaynakları serbest bırakıldı');
+    } catch (e, stackTrace) {
+      _logger.e('AudioService kaynakları serbest bırakılırken hata oluştu', error: e, stackTrace: stackTrace);
+    }
+  }
 }

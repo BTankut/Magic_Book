@@ -62,33 +62,42 @@ class TaleGenerationService {
       
       _updateProgress('Masal görselleri oluşturuluyor...', 0.4);
       
-      // Masal sayfalarını oluştur
-      final List<TalePage> pages = [];
+      // Masal sayfaları için görselleri paralel olarak oluştur
+      final List<Future<String?>> imageFutures = [];
       
       for (int i = 0; i < pageContents.length; i++) {
-        final content = pageContents[i];
-        
         _updateProgress(
-          'Sayfa ${i + 1} görseli oluşturuluyor...',
-          0.4 + (0.5 * (i / pageContents.length)),
+          'Sayfa ${i + 1} görseli talep ediliyor...',
+          0.4 + (0.1 * (i / pageContents.length)),
         );
         
-        // Sayfa için görsel oluştur
-        final String? imageBase64 = await _generatePageImage(
-          content: content,
+        // Sayfa için görsel talebini kuyruğa ekle
+        imageFutures.add(_generatePageImage(
+          content: pageContents[i],
           theme: theme,
           setting: setting,
           userProfile: userProfile,
           pageIndex: i,
           forceRefresh: forceRefresh,
-        );
-        
+        ));
+      }
+      
+      _updateProgress('Görseller işleniyor...', 0.5);
+      
+      // Tüm görsel taleplerinin tamamlanmasını bekle
+      final List<String?> images = await Future.wait(imageFutures);
+      
+      _updateProgress('Masal sayfaları oluşturuluyor...', 0.8);
+      
+      // Masal sayfalarını oluştur
+      final List<TalePage> pages = [];
+      
+      for (int i = 0; i < pageContents.length; i++) {
         // Sayfayı ekle
         pages.add(TalePage(
-          pageNumber: i + 1,  // Sayfa numarası ekledim
-          content: content,
-          imageBase64: imageBase64,
-          // audioBase64 parametresi yok, audioPath kullanılıyor
+          pageNumber: i + 1,
+          content: pageContents[i],
+          imageBase64: images[i],
         ));
       }
       
@@ -135,7 +144,6 @@ class TaleGenerationService {
       // Masal oluşturma promptu
       final String prompt = '''
       Bana bir çocuk masalı yaz. 
-      Başlık: "$title". 
       Tema: $themeText. 
       Ortam: $settingText. 
       Ana karakter: $characterDescription. 
@@ -143,12 +151,13 @@ class TaleGenerationService {
       Önemli kurallar:
       1. Masal tam olarak $wordCount kelime içermeli, eksik kelime sayısıyla teslim etme
       2. Masal çocuklar için uygun, yaratıcı ve eğlenceli olmalı
-      3. Masalı "SAYFA 1:", "SAYFA 2:" gibi başlıklarla bölme, tek bir metin olarak yaz
+      3. Masalı DÜZENLEYEN İŞARETLER KULLANMADAN tek bir metin olarak yaz - başlık, sayfa numarası veya bölüm işaretleri KOYMA
       4. Cümleler kısa ve anlaşılır olmalı
       5. Basit kelimeler kullan, karmaşık terimlerden kaçın
       6. Ana karakter, tema ve ortam tutarlı olmalı
       7. Açık bir giriş, gelişme ve sonuç kısmı olmalı
       8. Mutlaka tam olarak $wordCount kelime kullan, daha az değil
+      9. Yanıtında SADECE masal metnini gönder, başka açıklama veya metin ekleme
       ''';
       
       _logger.i('Gemini API\'ye gönderilen prompt: $prompt');
@@ -181,24 +190,16 @@ class TaleGenerationService {
     bool forceRefresh = false,
   }) async {
     try {
-      // Tema ve ortam metinlerini al
-      final themeText = _getThemeText(theme);
-      final settingText = _getSettingText(setting);
+      // Görsel promptu oluştur
+      final String prompt = _createImagePrompt(
+        content: content,
+        theme: _getThemeText(theme),
+        setting: _getSettingText(setting),
+        userProfile: userProfile,
+        pageIndex: pageIndex,
+      );
       
-      // Kullanıcı profilinden karakter bilgilerini al
-      final String characterDescription = _generateCharacterDescription(userProfile);
-      
-      // Görsel oluşturma promptu
-      final String prompt = '''
-      Çocuk masalı için bir illüstrasyon oluştur. 
-      Tema: $themeText. 
-      Ortam: $settingText. 
-      Ana karakter: $characterDescription. 
-      Sayfa içeriği: "$content"
-      Çocuklar için uygun, renkli ve detaylı bir illüstrasyon olmalı.
-      ''';
-      
-      _logger.i('DALL-E API\'ye gönderilen prompt: $prompt');
+      _logger.i('DALL-E API\'ye gönderilen prompt (sayfa ${pageIndex + 1}): $prompt');
       
       // DALL-E API'yi kullanarak görsel oluştur
       final String? base64Image = await _dalleApiService.generateImage(
@@ -206,11 +207,70 @@ class TaleGenerationService {
         forceRefresh: forceRefresh,
       );
       
+      if (base64Image != null) {
+        _logger.i('Sayfa ${pageIndex + 1} görseli başarıyla oluşturuldu');
+      } else {
+        _logger.w('Sayfa ${pageIndex + 1} görseli oluşturulamadı');
+      }
+      
       return base64Image;
     } catch (e, stackTrace) {
-      _logger.e('Sayfa görseli oluşturulurken hata: $e', stackTrace: stackTrace);
+      _logger.e('Sayfa ${pageIndex + 1} görseli oluşturulurken hata: $e', stackTrace: stackTrace);
+      
+      // Prompt içerik politikası sorunu olabilir, daha basit bir prompt ile tekrar dene
+      if (e.toString().contains('content_policy_violation') || 
+          e.toString().contains('İçerik politikası ihlali') ||
+          e.toString().contains('400')) {
+        try {
+          _logger.w('Sayfa ${pageIndex + 1} için basitleştirilmiş promptla tekrar deneniyor');
+          
+          // Basitleştirilmiş prompt
+          final String simplifiedPrompt = _createSimplifiedImagePrompt(
+            theme: _getThemeText(theme),
+            setting: _getSettingText(setting),
+          );
+          
+          _logger.i('DALL-E API\'ye basitleştirilmiş prompt gönderiliyor: $simplifiedPrompt');
+          
+          // DALL-E API'yi basitleştirilmiş promptla kullanarak görsel oluştur
+          return await _dalleApiService.generateImage(
+            prompt: simplifiedPrompt,
+            forceRefresh: true, // Önbelleği kullanmamak için
+          );
+        } catch (retryError, retryStackTrace) {
+          _logger.e('Basitleştirilmiş promptla da hata oluştu', error: retryError, stackTrace: retryStackTrace);
+          return null;
+        }
+      }
       return null;
     }
+  }
+  
+  /// Basitleştirilmiş görsel promptu (içerik politikası sorunlarını önlemek için).
+  String _createSimplifiedImagePrompt({
+    required String theme,
+    required String setting,
+  }) {
+    return 'Bir çocuk kitabı için $setting ortamında geçen, $theme temalı bir illüstrasyon. '
+           'Tarz: Sıcak, renkli, çocuk dostu. '
+           'Hiçbir yazı veya metin içermemelidir.';
+  }
+  
+  /// Görsel promptu oluşturur.
+  String _createImagePrompt({
+    required String content,
+    required String theme,
+    required String setting,
+    required UserProfile userProfile,
+    required int pageIndex,
+  }) {
+    // Kısa ve öz bir prompt oluştur
+    return 'Bir çocuk kitabı için $setting ortamında geçen, $theme temalı, ${userProfile.genderText} bir çocuğun hikayesini anlatan bir illüstrasyon. '
+           'Karakter özellikleri: ${userProfile.name}, ${userProfile.age} yaşında, ${userProfile.hairColorText} saçlı, '
+           '${userProfile.hairTypeText} saçlı, ${userProfile.skinToneText} tenli. '
+           'Sahne içeriği: $content. '
+           'Tarz: Sıcak, renkli, çocuk dostu, dijital çizim. '
+           'Görsel modern bir çocuk kitabı tarzında olmalı ve kesinlikle hiçbir yazı içermemelidir.';
   }
   
   /// Masal içeriğini sayfalara böler.
@@ -254,163 +314,97 @@ class TaleGenerationService {
     List<String> words = content.split(' ');
     List<String> pages = [];
     
-    // 300 kelimelik masalı 6 sayfaya bölmek için: 50 kelime/sayfa
-    // Varsayılan kelime sayısına göre sayfa başına düşecek kelime sayısını hesapla
-    int adjustedWordsPerPage = 50; // Sabit sayfa başına 50 kelime
-
-    _logger.i('Toplam ${words.length} kelime, sayfa başına $adjustedWordsPerPage kelime');
+    // Toplam kelime sayısı
+    int totalWords = words.length;
     
-    for (int i = 0; i < words.length; i += adjustedWordsPerPage) {
-      int end = (i + adjustedWordsPerPage) > words.length ? words.length : i + adjustedWordsPerPage;
-      String page = words.sublist(i, end).join(' ');
-      pages.add(page);
+    // Standart sayfalama ile sayfa sayısını hesapla
+    int pageCount = (totalWords / wordsPerPage).ceil();
+    
+    // Son sayfaya düşecek kelime sayısını kontrol et
+    int remainingWords = totalWords % wordsPerPage;
+    int minimumLastPageWords = 40; // Son sayfada olması gereken minimum kelime sayısı
+    
+    // Eğer son sayfadaki kelime sayısı minimum değerden azsa ve birden fazla sayfa varsa
+    if (remainingWords > 0 && remainingWords < minimumLastPageWords && pageCount > 1) {
+      _logger.i('Son sayfada $remainingWords kelime var, minimum $minimumLastPageWords\'dan az olduğu için yeniden düzenleniyor');
+      
+      // Kelimeleri diğer sayfalara dağıt
+      // Sayfa sayısını bir azalt (son sayfayı kaldır)
+      pageCount -= 1;
+      
+      // Her sayfaya eklenecek ek kelime sayısını hesapla
+      int extraWordsPerPage = (remainingWords / pageCount).ceil();
+      
+      // Yeni sayfa başına düşecek kelime sayısı
+      int newWordsPerPage = wordsPerPage + extraWordsPerPage;
+      
+      _logger.i('Yeni düzenleme: $pageCount sayfa, sayfa başına yaklaşık $newWordsPerPage kelime');
+      
+      // Yeni sayfalama yap
+      for (int i = 0; i < totalWords; i += newWordsPerPage) {
+        int end = (i + newWordsPerPage) > totalWords ? totalWords : i + newWordsPerPage;
+        String page = words.sublist(i, end).join(' ');
+        pages.add(page);
+        
+        // Son sayfa için kelime sayısını ayarla (son sayfa öncekilerden farklı olabilir)
+        if (pages.length == pageCount - 1 && end < totalWords) {
+          page = words.sublist(end).join(' ');
+          pages.add(page);
+          break;
+        }
+      }
+    } else {
+      // Standart sayfalama yap
+      int adjustedWordsPerPage = wordsPerPage; // Sabit sayfa başına kelime sayısı
+      
+      _logger.i('Toplam ${words.length} kelime, sayfa başına $adjustedWordsPerPage kelime');
+      
+      for (int i = 0; i < words.length; i += adjustedWordsPerPage) {
+        int end = (i + adjustedWordsPerPage) > words.length ? words.length : i + adjustedWordsPerPage;
+        String page = words.sublist(i, end).join(' ');
+        pages.add(page);
+      }
     }
     
     _logger.i('İçerik ${pages.length} sayfaya bölündü');
     return pages;
   }
   
-  // Aşağıdaki metotlar kullanılmıyor, yeni algoritmada _splitContentByWords yeterli
-  /*
-  /// Uzun sayfayı cümleleri bölmeden parçalara ayırır
-  List<String> _splitLongPage(String pageContent) {
-    List<String> words = pageContent.split(' ');
-    int targetWordsPerPage = 45; // 45 kelime civarında
-    
-    List<String> pages = [];
-    
-    for (int i = 0; i < words.length; i += targetWordsPerPage) {
-      int end = (i + targetWordsPerPage) > words.length ? words.length : i + targetWordsPerPage;
-      String pagePart = words.sublist(i, end).join(' ');
-      pages.add(pagePart);
-    }
-    
-    return pages;
-  }
-  
-  /// Cümleleri sayfalara gruplandırır
-  List<String> _groupSentencesIntoPages(List<String> sentences, int targetWordsPerPage) {
-    List<String> pages = [];
-    String currentPage = '';
-    int currentPageWordCount = 0;
-    
-    for (String sentence in sentences) {
-  */
-  /*    // Cümleyi temizle
-      sentence = sentence.trim();
-      if (sentence.isEmpty) continue;
+  /// Gemini API yanıtını sayfalara böler.
+  List<String> _extractPagesFromResponse(String response) {
+    try {
+      _logger.d('API yanıtından masal içeriği işleniyor');
       
-      // Cümledeki kelime sayısı
-      int sentenceWordCount = sentence.split(' ').length;
+      // Telif metni gibi anahtar ifadeleri ve gereksiz boşlukları kaldır
+      final cleanedResponse = response
+          .replaceAll(RegExp(r'^\s*\*\*.*?\*\*\s*', multiLine: true), '')  // ** başlıkları kaldır
+          .replaceAll(RegExp(r'^\s*#.*?#\s*', multiLine: true), '')     // # başlıkları kaldır
+          .replaceAll(RegExp(r'SAYFA \d+:', caseSensitive: false), '')  // Olası sayfa işaretlerini kaldır
+          .replaceAll(RegExp(r'\s+'), ' ')  // Fazla boşlukları tek boşluğa indir
+          .trim();
       
-      // Eğer cümle çok uzunsa (bir sayfaya sığmayacak kadar), kelime kelime böl
-      if (sentenceWordCount > targetWordsPerPage * 1.5) {
-        if (currentPage.isNotEmpty) {
-          pages.add(currentPage);
-          currentPage = '';
-          currentPageWordCount = 0;
-        }
+      _logger.i('Masal içeriği temizlendi, kelime sayısı: ${cleanedResponse.split(' ').length}');
+      
+      // İçeriği sayfalar halinde böl
+      List<String> pages = _splitContentIntoPages(cleanedResponse, 300); // Varsayılan 300 kelime
+      _logger.i('İçerik ${pages.length} sayfaya bölündü');
+      
+      // Sayfa sayısı kontrolü - çok fazla veya çok az sayfa varsa düzelt
+      if (pages.length > 15 || pages.length < 3) {
+        _logger.w('Sayfa sayısı sınırlar dışında: ${pages.length} - düzeltiliyor');
         
-        // Uzun cümleyi kelimelerine ayır ve yeni sayfalar oluştur
-        List<String> words = sentence.split(' ');
-        for (int i = 0; i < words.length; i += targetWordsPerPage) {
-          int end = (i + targetWordsPerPage) > words.length ? words.length : i + targetWordsPerPage;
-          String pageContent = words.sublist(i, end).join(' ');
-          pages.add(pageContent);
-        }
-        continue;
+        // İçeriği tekrar böl, farklı kelime sayısı hedefiyle
+        int targetWordCount = (pages.length > 15) ? 500 : 200;
+        pages = _splitContentIntoPages(cleanedResponse, targetWordCount);
+        
+        _logger.i('İçerik yeniden bölündü, yeni sayfa sayısı: ${pages.length}');
       }
       
-      // Eğer mevcut sayfa + yeni cümle hedef kelime sayısını aşıyorsa, yeni sayfa başlat
-      if (currentPageWordCount + sentenceWordCount > targetWordsPerPage) {
-        if (currentPage.isNotEmpty) {
-          pages.add(currentPage);
-          currentPage = sentence;
-          currentPageWordCount = sentenceWordCount;
-        } else {
-          // Eğer mevcut sayfa boşsa, cümleyi ekle
-          currentPage = sentence;
-          currentPageWordCount = sentenceWordCount;
-        }
-      } else {
-        // Mevcut sayfaya cümleyi ekle
-        if (currentPage.isNotEmpty) {
-          currentPage += ' ' + sentence;
-        } else {
-          currentPage = sentence;
-        }
-        currentPageWordCount += sentenceWordCount;
-      }
+      return pages;
+    } catch (e, stackTrace) {
+      _logger.e('İçerik sayfalara bölünürken hata: $e', stackTrace: stackTrace);
+      return [response]; // Hata durumunda tüm içeriği tek sayfa olarak döndür
     }
-    
-    // Son sayfayı ekle
-    if (currentPage.isNotEmpty) {
-      pages.add(currentPage);
-    }
-    
-    _logger.i('Cümlelerden ${pages.length} sayfa oluşturuldu');
-    return pages;
-  }
-  */
-  
-  // Bu metot kullanılmadığı için yorum haline getirildi
-  /*
-  /// Masal promptu oluşturur.
-  String _createTalePrompt({
-    required String title,
-    required String theme,
-    required String setting,
-    required int wordCount,
-    required UserProfile userProfile,
-  }) {
-    return '''
-    Lütfen "${title}" başlıklı, ${wordCount} kelimelik bir çocuk masalı oluştur.
-    
-    Masal şu temayı içermeli: ${theme}
-    Masal şu ortamda geçmeli: ${setting}
-    
-    Masal, ana karakter olarak şu özelliklere sahip bir çocuğu içermeli:
-    - İsim: ${userProfile.name}
-    - Yaş: ${userProfile.age}
-    - Cinsiyet: ${userProfile.genderText}
-    - Saç rengi: ${userProfile.hairColorText}
-    - Saç tipi: ${userProfile.hairTypeText}
-    - Ten rengi: ${userProfile.skinToneText}
-    
-    Masal, ${userProfile.age} yaşındaki bir çocuğun anlayabileceği dilde olmalı.
-    Masal, olumlu değerler ve öğretici mesajlar içermeli.
-    Masal, yaratıcı ve ilgi çekici olmalı.
-    Masal, giriş, gelişme ve sonuç bölümlerini içermeli.
-    
-    Lütfen sadece masal metnini döndür, başka açıklama ekleme.
-    ''';
-  }
-  */
-  
-  /// Görsel promptu oluşturur.
-  String _createImagePrompt({
-    required String content,
-    required String theme,
-    required String setting,
-    required UserProfile userProfile,
-    required int pageIndex,
-  }) {
-    return '''
-    Bir çocuk kitabı için $setting ortamında geçen, $theme temalı bir illüstrasyon.
-    
-    Ana karakter şu özelliklere sahip bir çocuk:
-    - İsim: ${userProfile.name}
-    - Yaş: ${userProfile.age}
-    - Cinsiyet: ${userProfile.genderText}
-    - Saç rengi: ${userProfile.hairColorText}
-    - Saç tipi: ${userProfile.hairTypeText}
-    - Ten rengi: ${userProfile.skinToneText}
-    
-    Sayfada şu içerik anlatılıyor: $content
-    
-    Tarz: Sıcak, renkli, çocuk dostu, detaylı, dijital çizim.
-    Görsel, antik bir kitap sayfasında yer alacak şekilde tasarlanmalı.
-    ''';
   }
   
   /// İlerleme durumunu günceller.
@@ -518,57 +512,5 @@ class TaleGenerationService {
     return '${userProfile.name}, ${userProfile.age} yaşında, ${userProfile.genderText}, '
     '${userProfile.hairColorText} saçlı, ${userProfile.hairTypeText} saçlı, '
     '${userProfile.skinToneText} tenli.';
-  }
-  
-  /// Gemini API yanıtını sayfalara böler.
-  List<String> _extractPagesFromResponse(String response) {
-    try {
-      _logger.d('API yanıtından sayfalar çıkarılıyor');
-      
-      // Yanıtı sayfalara ayır
-      List<String> pages = [];
-      
-      // "SAYFA X:" deseniyle bölmeyi dene
-      if (response.contains('SAYFA')) {
-        final pageMatches = RegExp(r'SAYFA \d+:(.+?)(?=SAYFA \d+:|$)', dotAll: true)
-            .allMatches(response)
-            .map((match) => match.group(1)?.trim() ?? '')
-            .where((text) => text.isNotEmpty)
-            .toList();
-            
-        if (pageMatches.isNotEmpty) {
-          pages = pageMatches;
-          _logger.i('${pages.length} sayfa bulundu (SAYFA X: formatı)');
-        }
-      }
-      
-      // Eğer sayfa bulunamadıysa, tüm içeriği al ve _splitContentIntoPages metodunu kullan
-      if (pages.isEmpty) {
-        _logger.w('Sayfa formatı bulunamadı, içerik manuel olarak bölünüyor');
-        
-        // Telif metin gibi anahtar ifadeleri kaldır
-        final cleanedResponse = response
-            .replaceAll(RegExp(r'^\s*\*\*.*?\*\*\s*', multiLine: true), '')  // ** başlıkları kaldır
-            .replaceAll(RegExp(r'^\s*#.*?#\s*', multiLine: true), '')     // # başlıkları kaldır
-            .trim();
-            
-        pages = _splitContentIntoPages(cleanedResponse, 300); // Varsayılan 300 kelime
-        _logger.i('İçerik manuel olarak ${pages.length} sayfaya bölündü');
-      }
-      
-      // Sayfa sayısı kontrolü - çok fazla veya çok az sayfa varsa düzelt
-      if (pages.length > 15 || pages.length < 3) {
-        _logger.w('Sayfa sayısı düzeltiliyor: ${pages.length}');
-        final allContent = pages.join(' ');
-        pages = _splitContentIntoPages(allContent, 300);  // 300 kelimelik varsayılan masal
-        _logger.i('Sayfa sayısı ${pages.length} olarak ayarlandı');
-      }
-      
-      return pages;
-    } catch (e, stackTrace) {
-      _logger.e('Sayfalar çıkarılırken hata oluştu: $e', stackTrace: stackTrace);
-      // Hata durumunda boş bir örnek sayfa döndür
-      return ['Bir varmış bir yokmuş...'];
-    }
   }
 }

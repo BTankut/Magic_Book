@@ -16,11 +16,8 @@ class MagicBookApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Uygulama yönünü dikey olarak sabitle
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+    // iPad için yatay mod desteği eklendi
+    // Yön kısıtlaması kaldırıldı
     
     // Tema değerleri
     final themeType = ref.watch(themeTypeProvider);
@@ -40,6 +37,31 @@ class MagicBookApp extends ConsumerWidget {
         darkTheme: darkTheme,
         themeMode: themeMode,
         home: const WelcomeScreen(), // Başlangıç ekranı
+        builder: (context, child) {
+          // Cihaz tipine göre tema ayarlarını uygula
+          final mediaQueryData = MediaQuery.of(context);
+          
+          // Metin ölçeklendirmeyi sınırla (çok büyük yazı boyutları için)
+          final constrainedTextScaleFactor = mediaQueryData.textScaleFactor.clamp(0.8, 1.4);
+          
+          return MediaQuery(
+            data: mediaQueryData.copyWith(
+              textScaleFactor: constrainedTextScaleFactor,
+            ),
+            child: Builder(
+              builder: (context) {
+                // Cihaz tipine göre tema ayarlarını uygula
+                final theme = Theme.of(context);
+                final adjustedTheme = AppTheme.applyDeviceSpecificSettings(context, theme);
+                
+                return Theme(
+                  data: adjustedTheme,
+                  child: child!,
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }
